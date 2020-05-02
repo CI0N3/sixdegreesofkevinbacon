@@ -15,7 +15,7 @@ movies = {}
 
 def load_data(directory):
     """
-    Load data from CSV files into memory.
+    Load data from CSVcd files into memory.
     """
     # Load people
     with open(f"{directory}/people.csv", encoding="utf-8") as f:
@@ -88,9 +88,44 @@ def shortest_path(source, target):
     """
     Returns the shortest list of (movie_id, person_id) pairs
     that connect the source to the target.
-
     If no possible path, returns None.
     """
+    start = Node(state=source, parent=None, action=None)
+    frontier = QueueFrontier()
+    frontier.add(start)
+
+    explored = set()
+
+    while True:
+
+        if frontier.empty():
+            return None
+
+        node = frontier.remove()
+
+        if node.state == target:
+            solution = []
+            while node.parent is not None:
+                solution.append((node.action, node.state))
+                node = node.parent
+            solution.reverse()
+            return solution
+
+        explored.add(node.state)
+
+        for movie_id, person_id in neighbors_for_person(node.state):
+            if person_id not in explored and not frontier.contains_state(person_id):
+                child = Node(state=person_id, parent=node, action=movie_id)
+                if child.state == target:
+                    solution = []
+                    while child.parent is not None:
+                        solution.append((child.action, child.state))
+                        child = child.parent
+                    solution.reverse()
+                    return solution
+                else:
+                    explored.add(child.state)
+                    frontier.add(child)
 
     # TODO
     raise NotImplementedError
